@@ -1,0 +1,14 @@
+{
+  "questions": [
+    {
+      "statement": "Is this the sample template question?",
+      "alternatives": ["Right", "Wrong"],
+      "correctAnswer": "Right"
+    },
+    {
+      "statement": "Should you always pick the first alternative?",
+      "alternatives": ["Right", "Wrong"],
+      "correctAnswer": "Wrong"
+    }
+  ]
+}

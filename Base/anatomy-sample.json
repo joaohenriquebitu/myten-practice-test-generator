@@ -1,0 +1,19 @@
+{
+  "questions": [
+    {
+      "statement": "Which tissue is primarily responsible for voluntary movement?",
+      "alternatives": [
+        "Skeletal muscle",
+        "Smooth muscle",
+        "Cardiac muscle",
+        "Connective tissue"
+      ],
+      "correctAnswer": "Skeletal muscle"
+    },
+    {
+      "statement": "The deltoid muscle is located in the shoulder.",
+      "alternatives": ["Right", "Wrong"],
+      "correctAnswer": "Right"
+    }
+  ]
+}
