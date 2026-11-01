@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import logo from "../assets/myten_logo.png";
 import {
   getInitialLocale,
@@ -10,7 +10,7 @@ import {
   type LayoutMode,
   type Theme,
 } from "./i18n";
-import { loadQuestions } from "./loadQuestions";
+import { loadQuestions, loadQuestionsFromFiles } from "./loadQuestions";
 import {
   buildExam,
   computeResults,
@@ -30,6 +30,7 @@ type Screen = "home" | "setup" | "quiz" | "results";
 type IconName =
   | "settings"
   | "database"
+  | "folder"
   | "target"
   | "award"
   | "play"
@@ -42,7 +43,7 @@ type IconName =
   | "list";
   // layout icon is intentionally text-neutral for both locales
 
-const bank = loadQuestions();
+const defaultBank = loadQuestions();
 
 function updateFile(
   settings: ExamSettings,
@@ -63,12 +64,17 @@ function parseNumber(value: string, fallback: number): number {
 }
 
 type NumericFileField = "questionCount" | "correctPoints" | "wrongPoints";
+type QuestionSource = "server" | "local";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [bank, setBank] = useState(() => defaultBank);
+  const [questionSource, setQuestionSource] = useState<QuestionSource>("server");
   const [settings, setSettings] = useState<ExamSettings>(() =>
-    defaultSettings(bank),
+    defaultSettings(defaultBank),
   );
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [folderError, setFolderError] = useState<string | null>(null);
   const [exam, setExam] = useState<ExamQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -121,6 +127,41 @@ export default function App() {
     setAnswers({});
     setListSelections({});
     setScreen("quiz");
+  }
+
+  async function handleFolderChange(
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles) {
+      return;
+    }
+
+    const folderName = selectedFiles[0]?.webkitRelativePath.split("/")[0] ?? selectedFiles[0]?.name;
+    const loaded = await loadQuestionsFromFiles(selectedFiles);
+    if (loaded.questions.length === 0) {
+      setFolderError(t.noQuestionsInFolder);
+      return;
+    }
+
+    setBank(loaded.questions);
+    setSettings(defaultSettings(loaded.questions));
+    setQuestionSource("local");
+    setSelectedFolder(folderName ?? null);
+    setFolderError(
+      loaded.invalidFiles.length > 0
+        ? t.invalidQuestionFiles(loaded.invalidFiles.length)
+        : null,
+    );
+    event.target.value = "";
+  }
+
+  function useServerBank() {
+    setBank(defaultBank);
+    setSettings(defaultSettings(defaultBank));
+    setQuestionSource("server");
+    setSelectedFolder(null);
+    setFolderError(null);
   }
 
   function adjustFileValue(
@@ -280,9 +321,37 @@ export default function App() {
           </div>
           <h1>{t.homeTitle}</h1>
           <p className="home-description">{t.homeDescription}</p>
-          <button className="primary home-action" onClick={() => setScreen("setup")}>
-            <Icon name="play" />{t.openSetup}
-          </button>
+          <div className="home-actions-area">
+            <div className="question-source-options" role="group">
+              <button
+                type="button"
+                className={`source-option ${questionSource === "server" ? "active" : ""}`}
+                onClick={useServerBank}
+              >
+                <Icon name="database" />{t.serverQuestionBank}
+              </button>
+              <label className={`secondary folder-button ${questionSource === "local" ? "active" : ""}`}>
+                <Icon name="folder" />{t.chooseQuestionFolder}
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  {...{ webkitdirectory: "", directory: "" }}
+                  onChange={handleFolderChange}
+                />
+              </label>
+            </div>
+            <div className="selected-source">
+              {questionSource === "local" && selectedFolder
+                ? t.selectedQuestionFolder(selectedFolder)
+                : t.localFolderHint}
+            </div>
+            <div className="home-action-row">
+              <button className="primary home-action" onClick={() => setScreen("setup")}>
+                <Icon name="play" />{t.openSetup}
+              </button>
+            </div>
+          </div>
+          {folderError && <p className="folder-error">{folderError}</p>}
         </section>
       )}
 
@@ -704,9 +773,10 @@ export default function App() {
                       </button>
                     </div>
                   ) : (
-                    <p className={statusClass(answer?.status)}>
-                      {feedbackText(answer, question.correctAnswer, t)}
-                    </p>
+                    <div className={`list-feedback ${statusClass(answer?.status)}`}>
+                      <Icon name={answer?.status === "correct" ? "check" : answer?.status === "incorrect" ? "x" : "skip"} />
+                      <span>{feedbackText(answer, question.correctAnswer, t)}</span>
+                    </div>
                   )}
                 </article>
               );
@@ -802,10 +872,10 @@ export default function App() {
             })}
           </div>
           <div className="actions">
-            <button className="primary" onClick={startExam}>
+            <button className="secondary" onClick={startExam}>
               <Icon name="refresh" />{t.retry}
             </button>
-            <button className="secondary" onClick={() => setScreen("home")}>
+            <button className="primary" onClick={() => setScreen("home")}>
               <Icon name="home" />{t.backToHome}
             </button>
           </div>
@@ -821,6 +891,7 @@ function Icon({ name }: { name: IconName }) {
   const paths: Record<IconName, ReactNode> = {
     settings: <><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="10" cy="18" r="2" /></>,
     database: <><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" /></>,
+    folder: <><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v8A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-10Z" /><path d="M3 10h18" /></>,
     target: <><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></>,
     award: <><path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" /><path d="M7 6H5a3 3 0 0 0 3 4M17 6h2a3 3 0 0 1-3 4M9 15l-1 6 4-2 4 2-1-6" /></>,
     play: <path d="m9 6 9 6-9 6V6Z" />,

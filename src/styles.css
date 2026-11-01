@@ -1425,7 +1425,8 @@ html[data-theme="light"] .file-config.is-unused {
   border: 1px solid var(--line, #304b68);
   border-radius: 14px;
   background: var(--surface-muted, #0f1b2a);
-  padding: 18px;
+  padding: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .list-question-heading {
@@ -1449,8 +1450,64 @@ html[data-theme="light"] .file-config.is-unused {
   color: var(--accent);
 }
 
+.list-question-heading span:last-child {
+  max-width: 70%;
+  overflow: hidden;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .list-question .question-title {
-  margin-bottom: 14px;
+  margin-bottom: 16px;
+  font-size: clamp(0.94rem, 1.3vw, 1.08rem);
+  line-height: 1.48;
+}
+
+.list-question .alternatives {
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.list-question .choice {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+
+.list-question .quiz-actions {
+  gap: 8px;
+}
+
+.list-question .quiz-actions .primary,
+.list-question .quiz-actions .secondary {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+.list-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 9px 10px;
+  border: 1px solid currentColor;
+  border-radius: 10px;
+  background: color-mix(in srgb, currentColor 10%, var(--surface));
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.list-feedback .ui-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
 }
 
 @media (max-width: 700px) {
@@ -2038,26 +2095,100 @@ html[data-theme="light"] body {
 }
 
 .home-card {
+  position: relative;
   max-width: 620px;
   margin: 0 auto;
   padding: clamp(28px, 6vw, 56px);
   text-align: center;
 }
 
-.home-mark {
+.home-actions-area {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.question-source-options {
   display: grid;
-  place-items: center;
-  width: 92px;
-  height: 92px;
-  margin: 0 auto 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 470px;
+  margin: 0 auto;
+}
+
+.source-option,
+.folder-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 8px 11px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.source-option {
   border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--surface-muted);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+}
+
+.source-option:hover,
+.folder-button:hover,
+.folder-button.active,
+.source-option.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface-muted));
+  color: var(--text);
+}
+
+.selected-source {
+  min-height: 18px;
+  margin-top: 9px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.folder-button {
+  width: auto;
+}
+
+.folder-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.folder-error {
+  margin: 14px 0 0;
+  color: var(--danger);
+  font-size: 0.82rem;
+}
+
+.home-mark {
+  width: 170px;
+  margin: 0 auto 18px;
 }
 
 .home-mark img {
-  width: 72px;
+  display: block;
+  width: 100%;
   height: auto;
+  object-fit: contain;
+  filter: invert(1);
+  mix-blend-mode: screen;
+}
+
+html[data-theme="light"] .home-mark img {
+  filter: none;
+  mix-blend-mode: multiply;
 }
 
 .home-card h1 {
@@ -2072,8 +2203,19 @@ html[data-theme="light"] body {
 }
 
 .home-action {
+  display: flex;
+  margin-left: auto;
   width: auto;
   min-width: 190px;
+  border: 0;
+}
+
+.home-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .actions .primary .ui-icon,

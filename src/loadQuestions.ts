@@ -67,3 +67,36 @@ export function loadQuestions(): LoadedQuestion[] {
 export function listSourceFiles(): string[] {
   return Object.keys(files).map(toFileName).sort();
 }
+
+export async function loadQuestionsFromFiles(
+  selectedFiles: FileList,
+): Promise<{ questions: LoadedQuestion[]; invalidFiles: string[] }> {
+  const questions: LoadedQuestion[] = [];
+  const invalidFiles: string[] = [];
+  const jsonFiles = Array.from(selectedFiles).filter((file) =>
+    file.name.toLowerCase().endsWith(".json"),
+  );
+
+  for (const file of jsonFiles) {
+    try {
+      const payload = JSON.parse(await file.text()) as QuestionFile;
+      const extracted = extractQuestions(payload);
+      if (extracted.length === 0) {
+        invalidFiles.push(file.name);
+        continue;
+      }
+
+      extracted.forEach((question, index) => {
+        questions.push({
+          ...question,
+          id: `${file.name}-${index}`,
+          sourceFile: file.name,
+        });
+      });
+    } catch {
+      invalidFiles.push(file.name);
+    }
+  }
+
+  return { questions, invalidFiles };
+}

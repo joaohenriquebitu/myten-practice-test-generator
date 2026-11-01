@@ -18,6 +18,12 @@ type TranslationSet = {
   homeTitle: string;
   homeDescription: string;
   openSetup: string;
+  serverQuestionBank: string;
+  chooseQuestionFolder: string;
+  localFolderHint: string;
+  selectedQuestionFolder: (name: string) => string;
+  noQuestionsInFolder: string;
+  invalidQuestionFiles: (count: number) => string;
   examSetup: string;
   setupDescription: string;
   baseFolder: string;
@@ -84,6 +90,12 @@ export const translations: Record<Locale, TranslationSet> = {
     homeTitle: "Welcome to Myten",
     homeDescription: "Create a practice exam from your question banks.",
     openSetup: "Configure an exam",
+    serverQuestionBank: "Server question bank",
+    chooseQuestionFolder: "Choose local folder",
+    localFolderHint: "Server question bank",
+    selectedQuestionFolder: (name) => `Selected folder: ${name}`,
+    noQuestionsInFolder: "No valid question JSON files were found in this folder.",
+    invalidQuestionFiles: (count) => `${count} JSON file(s) could not be read.`,
     examSetup: "Exam setup",
     setupDescription:
       "The exam uses every JSON file in {base} together. For each file, choose how many questions to draw at random and how scoring works.",
@@ -146,6 +158,12 @@ export const translations: Record<Locale, TranslationSet> = {
     homeTitle: "Bem-vindo ao Myten",
     homeDescription: "Crie um exame de prática a partir dos seus bancos de questões.",
     openSetup: "Configurar exame",
+    serverQuestionBank: "Banco de questões do servidor",
+    chooseQuestionFolder: "Escolher pasta local",
+    localFolderHint: "Banco de questões do servidor",
+    selectedQuestionFolder: (name) => `Pasta selecionada: ${name}`,
+    noQuestionsInFolder: "Nenhum arquivo JSON de questões válido foi encontrado nesta pasta.",
+    invalidQuestionFiles: (count) => `${count} arquivo(s) JSON não puderam ser lidos.`,
     examSetup: "Configuração do exame",
     setupDescription:
       "O exame usa todos os arquivos JSON de {base} juntos. Para cada arquivo, escolha quantas questões sortear e como será a pontuação.",
