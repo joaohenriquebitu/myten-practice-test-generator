@@ -476,49 +476,21 @@ code {
 
 .toggle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin: 16px 0 24px;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .toggle input {
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
-  margin: 0;
-  border: 1px solid #52749b;
-  border-radius: 7px;
-  background: #0f1b2a;
+  appearance: auto;
+  accent-color: var(--accent, #55adff);
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
   cursor: pointer;
-  display: grid;
-  place-content: center;
-  transition: background 160ms ease, border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.toggle input::before {
-  content: "";
-  width: 10px;
-  height: 6px;
-  border: solid #071522;
-  border-width: 0 0 2px 2px;
-  transform: rotate(-45deg) scale(0);
-  transition: transform 160ms ease;
-}
-
-.toggle input:hover {
-  border-color: #8ec5ff;
-}
-
-.toggle input:checked {
-  border-color: #3aa0ff;
-  background: #3aa0ff;
-}
-
-.toggle input:checked::before {
-  transform: rotate(-45deg) scale(1);
 }
 
 .toggle input:focus-visible,
@@ -2059,8 +2031,8 @@ html[data-theme="light"] body {
 
 .card > .stats li {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  column-gap: 9px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: 8px;
   align-items: center;
   width: 145px;
   min-height: 60px;
@@ -2071,8 +2043,10 @@ html[data-theme="light"] body {
 .card > .stats li > .ui-icon {
   position: static;
   grid-row: 1 / span 2;
-  width: 38px;
-  height: 38px;
+  align-self: center;
+  justify-self: center;
+  width: 20px;
+  height: 20px;
   transform: none;
   color: var(--text-muted);
 }
@@ -2328,5 +2302,625 @@ html[data-theme="light"] .home-mark img {
 
   .layout-choice-options button {
     flex: 1;
+  }
+}
+
+/* Compact, resilient layouts for narrow screens and long content. */
+button,
+input {
+  touch-action: manipulation;
+}
+
+.card,
+.file-config,
+.list-question,
+.file-results article {
+  min-width: 0;
+}
+
+.question-title,
+.choice,
+.review-heading p,
+.review-result,
+.file-results h3,
+.file-results p {
+  overflow-wrap: anywhere;
+}
+
+.list-question .choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.list-question .choice-indicator {
+  flex: 0 0 14px;
+}
+
+@media (max-width: 700px) {
+  .page {
+    width: min(100% - 20px, 1180px);
+    padding-top: 16px;
+  }
+
+  .topbar {
+    min-height: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .brand {
+    width: 96px;
+    height: 56px;
+  }
+
+  .topbar-copy {
+    flex: 1 1 150px;
+    min-width: 0;
+    padding-left: 12px;
+  }
+
+  .language-picker {
+    margin-left: auto;
+  }
+
+  .card {
+    padding: 18px 14px;
+    border-radius: 16px;
+  }
+
+  .home-card {
+    padding: 24px 16px;
+  }
+
+  .home-mark {
+    width: min(140px, 45vw);
+    margin-bottom: 12px;
+  }
+
+  .home-description {
+    margin-bottom: 18px;
+  }
+
+  .file-configs {
+    margin: 20px 0 16px;
+  }
+
+  .file-config {
+    padding: 12px;
+  }
+
+  .file-config header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-bottom: 12px;
+  }
+
+  .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .field-questions {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .fields .field > label {
+    min-height: 0;
+  }
+
+  .number-control {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+  }
+
+  .stats {
+    gap: 8px;
+    margin: 18px 0;
+  }
+
+  .card > .stats {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .card > .stats li {
+    width: auto;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .card > .stats li > .stat-copy > span {
+    line-height: 1.25;
+  }
+
+  .setup-summary {
+    gap: 10px;
+  }
+
+  .setup-summary .stats {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .start-button {
+    min-height: 46px;
+  }
+
+  .progress {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .progress span:last-child {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  .score {
+    font-size: clamp(2.8rem, 15vw, 4rem);
+  }
+
+  .question-source-options {
+    grid-template-columns: 1fr;
+  }
+
+  .home-action-row {
+    justify-content: stretch;
+  }
+
+  .home-action {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .page {
+    width: calc(100% - 16px);
+  }
+
+  .topbar-copy {
+    flex-basis: 120px;
+    padding-left: 8px;
+  }
+
+  .brand {
+    width: 82px;
+    height: 48px;
+  }
+
+  .theme-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .language-button {
+    padding: 7px 8px;
+  }
+
+  .card {
+    padding: 16px 12px;
+  }
+
+  .home-card {
+    padding: 20px 12px;
+  }
+
+  .list-question {
+    padding: 12px;
+  }
+
+  .layout-button {
+    padding: 7px;
+  }
+}
+
+/* Keep both question source controls on the same icon and label grid. */
+.source-option,
+.folder-button {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: 10px;
+  text-align: left;
+}
+
+.source-option > .ui-icon,
+.folder-button > .ui-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  justify-self: center;
+}
+
+.source-option > span,
+.folder-button > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* One icon scale and stroke system across the interface (Lucide). */
+.ui-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  margin: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+h1 .ui-icon {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+}
+
+h2 .ui-icon,
+.file-results article h3 .ui-icon {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}
+
+.primary .ui-icon,
+.secondary .ui-icon,
+.actions .primary .ui-icon,
+.actions .secondary .ui-icon,
+.home-action .ui-icon {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+}
+
+.theme-button > .ui-icon,
+.language-button > .ui-icon {
+  width: 19px;
+  height: 19px;
+  flex-basis: 19px;
+}
+
+.source-option > .ui-icon,
+.folder-button > .ui-icon,
+.layout-choice-label .ui-icon {
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
+}
+
+.card > .stats li > .ui-icon,
+.setup-summary .stats li > .ui-icon {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}
+
+.choice .ui-icon {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+}
+
+.review-status-icon .ui-icon {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+}
+
+/* Tighter page rhythm, especially on the question flow. */
+.page {
+  padding: clamp(16px, 2vw, 24px) 20px 32px;
+}
+
+.card {
+  padding: 14px;
+  border-radius: 14px;
+}
+
+.card > p {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.home-card {
+  padding: 18px;
+}
+
+.home-mark {
+  width: 150px;
+  margin-bottom: 12px;
+}
+
+.home-description {
+  margin-bottom: 16px;
+}
+
+.home-actions-area {
+  margin-top: 20px;
+  padding-top: 12px;
+}
+
+.layout-choice {
+  margin: 10px 0 12px;
+  padding: 8px 10px;
+}
+
+.file-config {
+  padding: 10px;
+}
+
+.file-configs {
+  gap: 8px;
+  margin: 14px 0 12px;
+}
+
+.file-config header {
+  margin-bottom: 10px;
+}
+
+.fields {
+  gap: 10px;
+}
+
+.toggle {
+  margin: 8px 0;
+}
+
+.stats {
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.progress {
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.progress span {
+  padding: 3px 8px;
+  font-size: 0.78rem;
+}
+
+.progress-bar {
+  height: 6px;
+  margin-bottom: 8px;
+}
+
+.scoring-hint {
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+}
+
+.question-title {
+  margin-bottom: 4px;
+  font-size: clamp(0.92rem, 1.2vw, 1rem);
+  line-height: 1.4;
+}
+
+.alternatives {
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.choice {
+  min-height: 44px;
+  padding: 8px 38px 8px 40px;
+  border-radius: 10px;
+}
+
+.primary,
+.secondary {
+  min-height: 42px;
+  padding: 9px 12px;
+}
+
+.quiz-actions {
+  gap: 6px;
+}
+
+.quiz-actions .primary,
+.quiz-actions .secondary {
+  min-height: 44px;
+  padding: 9px 12px;
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.quiz-actions .primary,
+.quiz-actions .secondary {
+  width: auto;
+}
+
+.quiz-actions .primary {
+  min-width: 150px;
+}
+
+.feedback-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.feedback-row > p {
+  flex: 1 1 220px;
+  margin: 0;
+}
+
+.feedback-row .primary {
+  width: auto;
+  margin-left: auto;
+}
+
+.questions-input-field {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 44px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 var(--range-progress),
+    var(--surface-raised) var(--range-progress) 100%
+  );
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.questions-input-field > input[type="number"] {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: clamp(18px, var(--range-progress), calc(100% - 18px));
+  width: 36px;
+  height: 24px;
+  min-height: 0;
+  padding: 1px 2px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.questions-control.is-empty .questions-input-field > input[type="number"],
+.file-config.is-unused .questions-control .questions-input-field > input[type="number"] {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+html[data-theme="light"] .questions-input-field > input[type="number"] {
+  background: var(--surface);
+}
+
+.questions-input-field .question-range {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+.questions-input-field .question-range:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.question-range::-webkit-slider-runnable-track {
+  background: transparent;
+}
+
+.question-range::-moz-range-track {
+  background: transparent;
+}
+
+.question-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.question-range::-moz-range-thumb {
+  width: 20px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.question-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.footer {
+  margin-top: 10px;
+}
+
+.file-results article,
+.review article {
+  padding: 10px;
+}
+
+.list-question {
+  padding: 10px;
+}
+
+.card > .stats li {
+  min-height: 52px;
+  padding: 6px 8px;
+}
+
+.setup-summary .start-button {
+  width: auto;
+  margin-left: auto;
+  align-self: flex-end;
+}
+
+@media (max-width: 700px) {
+  .page {
+    width: min(100% - 16px, 1180px);
+    padding: 12px 0 24px;
+  }
+
+  .card {
+    padding: 12px 10px;
+  }
+
+  .home-card {
+    padding: 14px 10px;
+  }
+
+  .file-config,
+  .list-question {
+    padding: 9px;
+  }
+
+  .progress {
+    gap: 4px 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .page {
+    width: calc(100% - 12px);
+  }
+
+  .card {
+    padding: 10px 8px;
+  }
+
+  .home-card {
+    padding: 12px 8px;
   }
 }

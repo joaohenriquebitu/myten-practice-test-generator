@@ -1,5 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type {
+  ChangeEvent,
+  CSSProperties,
+  PointerEvent as ReactPointerEvent,
+} from "react";
+import {
+  ArrowRight,
+  Award,
+  Check,
+  Database,
+  Folder,
+  Globe,
+  House,
+  List,
+  Moon,
+  Play,
+  RotateCcw,
+  Settings2,
+  SkipForward,
+  Sun,
+  Target,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import logo from "../assets/myten_logo.png";
 import {
   getInitialLocale,
@@ -40,8 +63,29 @@ type IconName =
   | "arrow"
   | "refresh"
   | "home"
-  | "list";
-  // layout icon is intentionally text-neutral for both locales
+  | "list"
+  | "moon"
+  | "sun"
+  | "globe";
+
+const icons: Record<IconName, LucideIcon> = {
+  settings: Settings2,
+  database: Database,
+  folder: Folder,
+  target: Target,
+  award: Award,
+  play: Play,
+  check: Check,
+  x: X,
+  skip: SkipForward,
+  arrow: ArrowRight,
+  refresh: RotateCcw,
+  home: House,
+  list: List,
+  moon: Moon,
+  sun: Sun,
+  globe: Globe,
+};
 
 const defaultBank = loadQuestions();
 
@@ -65,6 +109,13 @@ function parseNumber(value: string, fallback: number): number {
 
 type NumericFileField = "questionCount" | "correctPoints" | "wrongPoints";
 type QuestionSource = "server" | "local";
+type QuestionRangePointer = {
+  startX: number;
+  startY: number;
+  startedOnNumber: boolean;
+  horizontalDrag: boolean;
+  verticalDrag: boolean;
+};
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -85,6 +136,7 @@ export default function App() {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>(getInitialLayout);
   const [listSelections, setListSelections] = useState<Record<string, string | null>>({});
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const rangePointers = useRef<Record<string, QuestionRangePointer>>({});
 
   const current = exam[index];
   const t = translations[locale];
@@ -182,6 +234,99 @@ export default function App() {
     });
   }
 
+  function setQuestionCount(sourceFile: string, value: number) {
+    setSettings((previous) => {
+      const file = previous.files.find((item) => item.sourceFile === sourceFile);
+      if (!file) {
+        return previous;
+      }
+
+      return updateFile(previous, sourceFile, {
+        questionCount: Math.min(file.availableCount, Math.max(0, value)),
+      });
+    });
+  }
+
+  function questionCountAtPointer(
+    event: ReactPointerEvent<HTMLSpanElement>,
+    file: FileConfig,
+  ) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (bounds.width <= 0) {
+      return;
+    }
+
+    const ratio = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+    setQuestionCount(file.sourceFile, Math.round(ratio * file.availableCount));
+  }
+
+  function handleRangePointerDown(
+    event: ReactPointerEvent<HTMLSpanElement>,
+    file: FileConfig,
+  ) {
+    if (file.availableCount === 0) {
+      return;
+    }
+
+    const startedOnNumber = Boolean(
+      (event.target as HTMLElement).closest('input[type="number"]'),
+    );
+    rangePointers.current[file.sourceFile] = {
+      startX: event.clientX,
+      startY: event.clientY,
+      startedOnNumber,
+      horizontalDrag: false,
+      verticalDrag: false,
+    };
+  }
+
+  function handleRangePointerMove(
+    event: ReactPointerEvent<HTMLSpanElement>,
+    file: FileConfig,
+  ) {
+    const pointer = rangePointers.current[file.sourceFile];
+    if (!pointer || pointer.verticalDrag) {
+      return;
+    }
+
+    const deltaX = event.clientX - pointer.startX;
+    const deltaY = event.clientY - pointer.startY;
+    if (!pointer.horizontalDrag && Math.max(Math.abs(deltaX), Math.abs(deltaY)) >= 8) {
+      if (Math.abs(deltaY) >= Math.abs(deltaX)) {
+        pointer.verticalDrag = true;
+        return;
+      }
+
+      pointer.horizontalDrag = true;
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+
+    if (pointer.horizontalDrag) {
+      questionCountAtPointer(event, file);
+    }
+  }
+
+  function handleRangePointerUp(
+    event: ReactPointerEvent<HTMLSpanElement>,
+    file: FileConfig,
+  ) {
+    const pointer = rangePointers.current[file.sourceFile];
+    if (
+      pointer &&
+      !pointer.startedOnNumber &&
+      !pointer.verticalDrag &&
+      !pointer.horizontalDrag
+    ) {
+      questionCountAtPointer(event, file);
+    }
+    delete rangePointers.current[file.sourceFile];
+  }
+
+  function handleRangePointerCancel(file: FileConfig) {
+    delete rangePointers.current[file.sourceFile];
+  }
+
   function lockAnswer(record: AnswerRecord) {
     setAnswers((previous) => ({
       ...previous,
@@ -261,16 +406,7 @@ export default function App() {
             title={theme === "dark" ? t.lightTheme : t.darkTheme}
             onClick={() => setTheme((value) => (value === "dark" ? "light" : "dark"))}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              {theme === "dark" ? (
-                <path d="M20.5 14.7A8.5 8.5 0 0 1 9.3 3.5 8.5 8.5 0 1 0 20.5 14.7Z" />
-              ) : (
-                <>
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-                </>
-              )}
-            </svg>
+            <Icon name={theme === "dark" ? "moon" : "sun"} />
           </button>
           <button
             className="language-button"
@@ -279,10 +415,7 @@ export default function App() {
             aria-expanded={languageMenuOpen}
             onClick={() => setLanguageMenuOpen((open) => !open)}
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M3 12h18M12 3c2.2 2.4 3.3 5.4 3.3 9s-1.1 6.6-3.3 9c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z" />
-            </svg>
+            <Icon name="globe" />
             <span>{locale === "en" ? "EN" : "PT"}</span>
           </button>
           {languageMenuOpen && (
@@ -328,10 +461,12 @@ export default function App() {
                 className={`source-option ${questionSource === "server" ? "active" : ""}`}
                 onClick={useServerBank}
               >
-                <Icon name="database" />{t.serverQuestionBank}
+                <Icon name="database" />
+                <span>{t.serverQuestionBank}</span>
               </button>
               <label className={`secondary folder-button ${questionSource === "local" ? "active" : ""}`}>
-                <Icon name="folder" />{t.chooseQuestionFolder}
+                <Icon name="folder" />
+                <span>{t.chooseQuestionFolder}</span>
                 <input
                   type="file"
                   accept=".json,application/json"
@@ -407,17 +542,17 @@ export default function App() {
               </button>
               <button
                 type="button"
-                className={layoutMode === "two-column" ? "active" : ""}
-                onClick={() => setLayoutMode("two-column")}
-              >
-                {t.twoColumnLayout}
-              </button>
-              <button
-                type="button"
                 className={layoutMode === "one-column" ? "active" : ""}
                 onClick={() => setLayoutMode("one-column")}
               >
                 {t.oneColumnLayout}
+              </button>
+              <button
+                type="button"
+                className={layoutMode === "two-column" ? "active" : ""}
+                onClick={() => setLayoutMode("two-column")}
+              >
+                {t.twoColumnLayout}
               </button>
             </div>
           </div>
@@ -459,23 +594,50 @@ export default function App() {
                       >
                         −
                       </button>
-                      <input
-                        id={`questions-${file.sourceFile}`}
-                        type="number"
-                        min={0}
-                        max={file.availableCount}
-                        value={file.questionCount}
-                        onChange={(event) =>
-                          setSettings((previous) =>
-                            updateFile(previous, file.sourceFile, {
-                              questionCount: Math.min(
-                                file.availableCount,
-                                Math.max(0, parseNumber(event.target.value, 0)),
-                              ),
-                            }),
-                          )
-                        }
-                      />
+                      <span
+                        className="questions-input-field"
+                        style={{
+                          "--range-progress": `${file.availableCount > 0
+                            ? (file.questionCount / file.availableCount) * 100
+                            : 0}%`,
+                        } as CSSProperties}
+                        onPointerDown={(event) => handleRangePointerDown(event, file)}
+                        onPointerMove={(event) => handleRangePointerMove(event, file)}
+                        onPointerUp={(event) => handleRangePointerUp(event, file)}
+                        onPointerCancel={() => handleRangePointerCancel(file)}
+                      >
+                        <input
+                          id={`questions-${file.sourceFile}`}
+                          type="number"
+                          min={0}
+                          max={file.availableCount}
+                          value={file.questionCount}
+                          onChange={(event) =>
+                            setQuestionCount(
+                              file.sourceFile,
+                              parseNumber(event.target.value, 0),
+                            )
+                          }
+                        />
+                        <input
+                          id={`questions-slider-${file.sourceFile}`}
+                          className="question-range"
+                          type="range"
+                          min={0}
+                          max={file.availableCount}
+                          step={1}
+                          value={file.questionCount}
+                          disabled={file.availableCount === 0}
+                          aria-label={`${t.questionsToDraw}: ${file.sourceFile}`}
+                          aria-valuetext={`${file.questionCount} / ${file.availableCount}`}
+                          onChange={(event) =>
+                            setQuestionCount(
+                              file.sourceFile,
+                              parseNumber(event.target.value, 0),
+                            )
+                          }
+                        />
+                      </span>
                       <button
                         type="button"
                         aria-label={t.increaseQuestions}
@@ -732,9 +894,10 @@ export default function App() {
                     {question.alternatives.map((alternative) => {
                       const isSelected = questionSelection === alternative;
                       const isCorrect = alternative === question.correctAnswer;
+                      const revealAnswer = questionLocked && !settings.revealAnswersAtEnd;
                       let className = "choice";
-                      if (questionLocked && isCorrect) className += " correct";
-                      else if (questionLocked && isSelected && answer?.status === "incorrect") className += " incorrect";
+                      if (revealAnswer && isCorrect) className += " correct";
+                      else if (revealAnswer && isSelected && answer?.status === "incorrect") className += " incorrect";
                       else if (isSelected) className += " selected";
 
                       return (
@@ -750,8 +913,8 @@ export default function App() {
                           }
                         >
                           <span className="choice-indicator" aria-hidden="true" />
-                          {questionLocked && isCorrect && <Icon name="check" />}
-                          {questionLocked && isSelected && answer?.status === "incorrect" && <Icon name="x" />}
+                          {revealAnswer && isCorrect && <Icon name="check" />}
+                          {revealAnswer && isSelected && answer?.status === "incorrect" && <Icon name="x" />}
                           {alternative}
                         </button>
                       );
@@ -772,12 +935,12 @@ export default function App() {
                         <Icon name="check" />{t.confirmAnswer}
                       </button>
                     </div>
-                  ) : (
+                  ) : !settings.revealAnswersAtEnd ? (
                     <div className={`list-feedback ${statusClass(answer?.status)}`}>
                       <Icon name={answer?.status === "correct" ? "check" : answer?.status === "incorrect" ? "x" : "skip"} />
                       <span>{feedbackText(answer, question.correctAnswer, t)}</span>
                     </div>
-                  )}
+                  ) : null}
                 </article>
               );
             })}
@@ -888,23 +1051,8 @@ export default function App() {
 }
 
 function Icon({ name }: { name: IconName }) {
-  const paths: Record<IconName, ReactNode> = {
-    settings: <><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="10" cy="18" r="2" /></>,
-    database: <><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7" /></>,
-    folder: <><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v8A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-10Z" /><path d="M3 10h18" /></>,
-    target: <><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></>,
-    award: <><path d="M7 4h10v6a5 5 0 0 1-10 0V4Z" /><path d="M7 6H5a3 3 0 0 0 3 4M17 6h2a3 3 0 0 1-3 4M9 15l-1 6 4-2 4 2-1-6" /></>,
-    play: <path d="m9 6 9 6-9 6V6Z" />,
-    check: <path d="m5 12 4 4L19 6" />,
-    x: <><path d="m6 6 12 12M18 6 6 18" /></>,
-    skip: <><path d="m5 5 7 7-7 7M14 5h5v14h-5" /></>,
-    arrow: <><path d="M5 12h13M13 6l6 6-6 6" /></>,
-    refresh: <><path d="M20 11a8 8 0 0 0-14.65-4.35L3 9" /><path d="M3 4v5h5" /><path d="M4 13a8 8 0 0 0 14.65 4.35L21 15" /><path d="M21 20v-5h-5" /></>,
-    home: <><path d="m3 11 9-8 9 8v10H3V11Z" /><path d="M9 21v-7h6v7" /></>,
-    list: <><path d="M8 6h13M8 12h13M8 18h13" /><path d="M3 6h.01M3 12h.01M3 18h.01" /></>,
-  };
-
-  return <svg className="ui-icon" viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
+  const IconComponent = icons[name];
+  return <IconComponent className="ui-icon" aria-hidden="true" />;
 }
 
 function formatPoints(value: number): string {
