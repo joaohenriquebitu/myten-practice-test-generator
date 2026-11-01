@@ -1,10 +1,23 @@
 export type Locale = "en" | "pt-BR";
+export type Theme = "dark" | "light";
+export type LayoutMode = "single" | "two-column" | "one-column";
 
 type TranslationSet = {
   language: string;
   languageLabel: string;
+  themeLabel: string;
+  lightTheme: string;
+  darkTheme: string;
+  layoutLabel: string;
+  singleLayout: string;
+  twoColumnLayout: string;
+  oneColumnLayout: string;
+  createdBy: string;
   subtitle: string;
   homeLabel: string;
+  homeTitle: string;
+  homeDescription: string;
+  openSetup: string;
   examSetup: string;
   setupDescription: string;
   baseFolder: string;
@@ -51,15 +64,26 @@ type TranslationSet = {
   yourAnswer: string;
   correctAnswer: string;
   retry: string;
-  backToSetup: string;
+  backToHome: string;
 };
 
 export const translations: Record<Locale, TranslationSet> = {
   en: {
     language: "Language",
     languageLabel: "Select language",
+    themeLabel: "Change theme",
+    lightTheme: "Light theme",
+    darkTheme: "Dark theme",
+    layoutLabel: "Question layout",
+    singleLayout: "One question at a time",
+    twoColumnLayout: "List — 2 columns",
+    oneColumnLayout: "List — 1 column",
+    createdBy: "Created by @joaohenriquebitu",
     subtitle: "Question simulator",
     homeLabel: "Myten home",
+    homeTitle: "Welcome to Myten",
+    homeDescription: "Create a practice exam from your question banks.",
+    openSetup: "Configure an exam",
     examSetup: "Exam setup",
     setupDescription:
       "The exam uses every JSON file in {base} together. For each file, choose how many questions to draw at random and how scoring works.",
@@ -77,8 +101,8 @@ export const translations: Record<Locale, TranslationSet> = {
     decreaseWrongPoints: "Decrease points per wrong answer",
     increaseWrongPoints: "Increase points per wrong answer",
     penaltyHint: "Use a negative value to penalize mistakes.",
-    examQuestions: "exam questions",
-    maxScore: "max score",
+    examQuestions: "Exam questions",
+    maxScore: "Max score",
     startExam: "Start exam",
     questionProgress: (current, total) => `Question ${current} of ${total}`,
     correct: "Correct",
@@ -104,13 +128,24 @@ export const translations: Record<Locale, TranslationSet> = {
     yourAnswer: "Your answer",
     correctAnswer: "Correct",
     retry: "Retry with same settings",
-    backToSetup: "Back to setup",
+    backToHome: "Go to start",
   },
   "pt-BR": {
     language: "Idioma",
     languageLabel: "Selecionar idioma",
+    themeLabel: "Alterar tema",
+    lightTheme: "Tema claro",
+    darkTheme: "Tema escuro",
+    layoutLabel: "Disposição das questões",
+    singleLayout: "Uma questão por vez",
+    twoColumnLayout: "Lista — 2 colunas",
+    oneColumnLayout: "Lista — 1 coluna",
+    createdBy: "Criado por @joaohenriquebitu",
     subtitle: "Simulador de questões",
     homeLabel: "Página inicial do Myten",
+    homeTitle: "Bem-vindo ao Myten",
+    homeDescription: "Crie um exame de prática a partir dos seus bancos de questões.",
+    openSetup: "Configurar exame",
     examSetup: "Configuração do exame",
     setupDescription:
       "O exame usa todos os arquivos JSON de {base} juntos. Para cada arquivo, escolha quantas questões sortear e como será a pontuação.",
@@ -128,8 +163,8 @@ export const translations: Record<Locale, TranslationSet> = {
     decreaseWrongPoints: "Diminuir pontos por resposta errada",
     increaseWrongPoints: "Aumentar pontos por resposta errada",
     penaltyHint: "Use um valor negativo para penalizar erros.",
-    examQuestions: "questões no exame",
-    maxScore: "pontuação máxima",
+    examQuestions: "Questões no exame",
+    maxScore: "Pontuação máxima",
     startExam: "Iniciar exame",
     questionProgress: (current, total) => `Questão ${current} de ${total}`,
     correct: "Correta",
@@ -155,7 +190,7 @@ export const translations: Record<Locale, TranslationSet> = {
     yourAnswer: "Sua resposta",
     correctAnswer: "Correta",
     retry: "Tentar novamente com as mesmas configurações",
-    backToSetup: "Voltar para configuração",
+    backToHome: "Ir para o início",
   },
 };
 
@@ -165,5 +200,24 @@ export function getInitialLocale(): Locale {
     return saved === "pt-BR" || saved === "en" ? saved : "en";
   } catch {
     return "en";
+  }
+}
+
+export function getInitialTheme(): Theme {
+  try {
+    const saved = window.localStorage.getItem("myten-theme");
+    return saved === "light" || saved === "dark" ? saved : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+export function getInitialLayout(): LayoutMode {
+  try {
+    const saved = window.localStorage.getItem("myten-layout");
+    if (saved === "two-column" || saved === "list") return "two-column";
+    return saved === "one-column" || saved === "single" ? saved : "single";
+  } catch {
+    return "single";
   }
 }
